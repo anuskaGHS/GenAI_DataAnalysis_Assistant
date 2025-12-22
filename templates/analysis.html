@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - InSighto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-50px) translateX(50px); }
+            50% { transform: translateY(-100px) translateX(-50px); }
+            75% { transform: translateY(-50px) translateX(-100px); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 20px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 2.5em;
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-large {
+            padding: 20px 60px;
+            font-size: 1.3em;
+            margin-top: 30px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-step.completed .step-circle {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+        }
+
+        .progress-step.active .step-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(102, 126, 234, 0); }
+        }
+
+        .progress-step span {
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .progress-line {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            position: relative;
+            margin: 0 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 60px 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .analysis-results h2 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-align: center;
+            animation: slideIn 0.8s ease 0.6s both;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section-description {
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 40px;
+            animation: slideIn 0.8s ease 0.8s both;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            animation: fadeInUp 0.8s ease 1s both;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+
+        .summary-card:hover::before {
+            left: 100%;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            min-width: 60px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card-content h4 {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 2em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease both;
+            transition: all 0.3s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-card h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-card h4 {
+            font-size: 1.3em;
+            color: #555;
+            margin: 25px 0 15px;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            animation: scaleIn 0.5s ease both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .chart-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .chart-card h4 {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .chart-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-image:hover {
+            transform: scale(1.02);
+        }
+
+        .chart-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-card h5 {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+            font-weight: 600;
+        }
+
+        .stat-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .stat-row span:first-child {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-row span:last-child {
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Insights Card */
+        .insights-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insights-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .insights-card h3 {
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .insights-content {
+            line-height: 1.8;
+            font-size: 1.05em;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Action Section */
+        .action-section {
+            text-align: center;
+            margin: 50px 0 30px;
+            animation: fadeInUp 0.8s ease both;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: white;
+            margin-top: 30px;
+            animation: fadeIn 1s ease both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .main-content {
+                padding: 40px 25px;
+            }
+
+            .progress-bar {
+                padding: 15px;
+            }
+
+            .step-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+
+            .progress-step span {
+                font-size: 0.75em;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">🔍 InSighto</h1>
+            <div class="header-actions">
+                <a href="/overview" class="btn btn-secondary btn-small">← Back</a>
+                <a href="/report" class="btn btn-primary btn-small">View Full Report</a>
+                <a href="/get_started" class="btn btn-secondary btn-small">New Analysis</a>
+            </div>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step completed">
+                <div class="step-circle">✓</div>
+                <span>Upload</span>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step completed">
+                <div class="step-circle">✓</div>
+                <span>Overview</span>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step active">
+                <div class="step-circle">✓</div>
+                <span>Analysis</span>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step">
+                <div class="step-circle">4</div>
+                <span>Report</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="analysis-results">
+                <h2>Analysis Results</h2>
+                <p class="section-description">{{ filename }}</p>
+
+                <!-- Dataset Summary -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-content">
+                            <h4>Total Rows</h4>
+                            <p class="card-value">{{ profile.basic_info.total_rows|default(0) }}</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">📈</div>
+                        <div class="card-content">
+                            <h4>Total Columns</h4>
+                            <p class="card-value">{{ profile.basic_info.total_columns|default(0) }}</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">🔢</div>
+                        <div class="card-content">
+                            <h4>Numeric Columns</h4>
+                            <p class="card-value">{{ profile.column_types.numeric|length|default(0) }}</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">⭐</div>
+                        <div class="card-content">
+                            <h4>Quality Score</h4>
+                            <p class="card-value">{{ "%.1f"|format(profile.data_quality.overall_quality_score|default(0)) }}/100</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualizations -->
+                <div class="section-card">
+                    <h3>📊 Visualizations</h3>
+                    <div class="charts-grid">
+                        {% if charts %}
+                            {% for chart in charts %}
+                            <div class="chart-card">
+                                <h4>{{ chart.title }}</h4>
+                                <img src="{{ url_for('serve_chart', session_id=session_id, filename=chart.filename) }}" 
+                                     alt="{{ chart.title }}"
+                                     class="chart-image">
+                                <p class="chart-description">{{ chart.description }}</p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No charts generated</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Key Statistics -->
+                <div class="section-card">
+                    <h3>📈 Key Statistics</h3>
+                    
+                    {% if profile.numeric_stats %}
+                    <h4>Numeric Variables</h4>
+                    <div class="stats-grid">
+                        {% for col_name, stats in profile.numeric_stats.items() %}
+                        <div class="stat-card">
+                            <h5>{{ col_name }}</h5>
+                            <div class="stat-details">
+                                <div class="stat-row">
+                                    <span>Mean:</span>
+                                    <span>{{ "%.2f"|format(stats.mean) }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>Median:</span>
+                                    <span>{{ "%.2f"|format(stats.median) }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>Std Dev:</span>
+                                    <span>{{ "%.2f"|format(stats.std) }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>Min:</span>
+                                    <span>{{ "%.2f"|format(stats.min) }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>Max:</span>
+                                    <span>{{ "%.2f"|format(stats.max) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if profile.categorical_stats %}
+                    <h4 style="margin-top: 30px;">Categorical Variables</h4>
+                    <div class="stats-grid">
+                        {% for col_name, stats in profile.categorical_stats.items() %}
+                        <div class="stat-card">
+                            <h5>{{ col_name }}</h5>
+                            <div class="stat-details">
+                                <div class="stat-row">
+                                    <span>Unique Values:</span>
+                                    <span>{{ stats.unique_count }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span>Most Common:</span>
+                                    <span>{{ stats.mode }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- AI Insights -->
+                <div class="section-card insights-card">
+                    <h3>🤖 AI-Generated Insights</h3>
+                    <div class="insights-content">
+                        {{ insights|safe if insights else 'No insights available' }}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-section">
+                    <a href="\report" class="btn btn-primary btn-large">
+                        View Complete Report →
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 InSighto - Autonomous AI Data Analyst</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Create animated background particles
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 15;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const size = Math.random() * 80 + 20;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // Stagger animations for cards
+        const summaryCards = document.querySelectorAll('.summary-card');
+        summaryCards.forEach((card, index) => {
+            card.style.animationDelay = (1 + index * 0.1) + 's';
+        });
+
+        const chartCards = document.querySelectorAll('.chart-card');
+        chartCards.forEach((card, index) => {
+            card.style.animationDelay = (0.2 * index) + 's';
+        });
+
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = (0.1 * index) + 's';
+        });
+
+        const sectionCards = document.querySelectorAll('.section-card');
+        sectionCards.forEach((card, index) => {
+            card.style.animationDelay = (1.2 + index * 0.2) + 's';
+        });
+    </script>
+</body>
+</html>
